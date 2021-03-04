@@ -148,15 +148,13 @@ def get_main_dir():
     return os.path.dirname(sys.argv[0])
 
 
-async def main(env_data):
+async def main(env_data, connection_retry=True):
     global status
 
     uri = get_connection_uri(env_data.get('base_url'), env_data.get('username'))
     logger.info('Connecting to %s' % uri)
 
     accounts = env_data.get('accounts')
-
-    connection_retry = True
 
     while connection_retry:
         async with websockets.connect(uri) as websocket:
@@ -219,8 +217,9 @@ async def main(env_data):
                 connection_retry = False
                 logger.error('Error while authenticating to the server. Please check your credentials in the .env file.')
                 status = 'Error Authenticating'
+
         if connection_retry:
-            time.sleep(10)
+            time.sleep(1)
 
 
 class GUI(object):
@@ -284,15 +283,31 @@ class GUI(object):
                 self._gui_env_entries.update(_acct_entry(i + 1, act, row))
                 row += 3
 
+        self._button = ttk.Button(self._frame, text='Reconnect', state='disabled')
+        self._button.grid(column=1, row=row, sticky='E', padx=5, pady=5)
+        self._button.configure(command=self._button_clicked)
+
+        row += 1
+
         self._result_label = ttk.Label(self._frame)
         self._result_label.grid(row=row, columnspan=3, padx=5, pady=5)
 
         self._frame.grid(padx=10, pady=10, sticky='NSEW')
 
+    def _button_clicked(self, *args):
+        self.start_thread(True)
+
     def update_status(self):
+        offer_reconnect = (self._thread is None) or (not self._thread.is_alive())
+        if offer_reconnect:
+            self._button.configure(state='normal')
+        else:
+            self._button.configure(state='disabled')
+
         msg = 'Status: %s' % status
         self._result_label.configure(text=msg)
         self._root.after(1000, self.update_status)
+
 
     def get_env_data_from_gui(self):
         d = {k: self._gui_env_entries[k].get() for k in ('username', 'token', 'ethereum_provider')}
@@ -311,14 +326,19 @@ class GUI(object):
         d['accounts'] = accounts
         return d
 
-    def start_thread(self):
+    def start_thread(self, was_reconfigured=False):
         env_data = self.get_env_data_from_gui()
 
         try:
             check_config(env_data)
         except ConfigError:
             global status
-            status = 'Not Configured'
+
+            if was_reconfigured:
+                status = 'Incorrect Configuration'
+            else:
+                status = 'Not Configured'
+
             return
 
         def run_thread():
@@ -341,6 +361,7 @@ def uimain(env_data):
 if __name__ == "__main__":
 
     try:
+        # default to console on linux unless passing gui as an extra argument
         _use_gui = sys.argv[1] == 'gui'
     except IndexError:
         # default to GUI on windows
