@@ -35,7 +35,11 @@ status = "Starting"
 
 
 def get_client_source():
-    return inspect.getsource(sys.modules[__name__]).encode('utf-8')
+    if main_is_frozen():
+        with open(os.path.join(getattr(sys, '_MEIPASS'), 'src', 'main.py'), 'rt') as f:
+            return f.read()
+    else:
+        return inspect.getsource(sys.modules[__name__]).encode('utf-8')
 
 
 def get_client_hash():
