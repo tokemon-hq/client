@@ -24,7 +24,7 @@ import websockets
 
 from uniswap import Uniswap
 from web3 import Web3
-from dotenv import load_dotenv
+from dotenv import load_dotenv, find_dotenv
 
 
 logging.basicConfig(format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO)
@@ -86,7 +86,9 @@ async def uniswap_buy_input(input_token, output_token, input_quantity, max_slipp
 
 
 def read_data_from_env():
-    load_dotenv()
+    path = find_dotenv()
+    logging.info('Attempting to read configuration from: %s' % path)
+    load_dotenv(path)
     username = os.environ.get('USER_NAME')
     accounts = read_accounts_from_env()
     ethereum_provider = os.environ.get('ETHEREUM_PROVIDER')
@@ -368,7 +370,6 @@ if __name__ == "__main__":
         _use_gui = platform.system() == 'Windows'
 
     _env_data = read_data_from_env()
-    # print(_env_data)
 
     if HAS_TK and (main_is_frozen() or _use_gui):
         uimain(_env_data)
