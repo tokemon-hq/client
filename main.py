@@ -1,11 +1,12 @@
 import os
-import hashlib
 import sys
+import json
+import time
+import socket
+import hashlib
 import inspect
 import logging
 import asyncio
-import json
-import time
 import platform
 import threading
 import itertools
@@ -348,7 +349,14 @@ class GUI(object):
             return
 
         def run_thread():
-            asyncio.run(main(env_data))
+            global status
+            try:
+                asyncio.run(main(env_data))
+            except (ConnectionError, socket.error):
+                status = "Connection Error"
+            except Exception:
+                status = "Unknown Error"
+                logging.error(status, exc_info=True)
 
         self._thread = threading.Thread(target=run_thread, daemon=True)
         self._thread.start()
