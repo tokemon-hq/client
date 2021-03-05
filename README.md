@@ -7,7 +7,7 @@ to execute.
 
 # Installation
 
-If you are on Windows 10, you can download the latest release from the releases page.
+If you are on Windows 10, you can download the latest release from the [releases page](https://github.com/tokemon-hq/client/releases).
 
 If you are on Linux or Mac, you can install by checking out this repository and following
 the steps below
