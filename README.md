@@ -2,6 +2,8 @@
 
 This is the trading bot client which executes the trades you request on the tokemon.io platform.
 
+![](https://tokemon.io/assets/images/client.png)
+
 This bot needs to be running in order for the stop loss, take profit, and other strategies
 to execute.
 
