@@ -180,8 +180,14 @@ async def main(env_data, connection_retry=True):
                 fl_exit = False
                 try:
                     while not fl_exit:
-                        # get in processing mode
-                        msg = await websocket.recv()
+
+                        try:
+                            msg = await asyncio.wait_for(websocket.recv(), timeout=10)
+                        except asyncio.exceptions.TimeoutError:
+                            # ping the server
+                            logger.debug('Ping server.')
+                            await websocket.send(json.dumps({'code': 'ping', 'token': env_data.get('token'), 'accounts': list(accounts.keys())}))
+                            continue
 
                         try:
                             msg_json = json.loads(msg)
