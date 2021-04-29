@@ -12,6 +12,8 @@ import threading
 import itertools
 import collections
 
+from uniswap.uniswap import ETH_ADDRESS
+
 try:
     import tkinter as tk
     from tkinter import ttk
@@ -81,7 +83,10 @@ async def uniswap_buy_input(input_token, output_token, input_quantity, max_slipp
     uniswap_wrapper = Uniswap(account['address'], account['pkey'], web3=w3, version=2, max_slippage=max_slippage)
 
     # trade exact input_quantity of input_token for output_token
-    req = uniswap_wrapper.make_trade(Web3.toChecksumAddress(input_token), Web3.toChecksumAddress(output_token),
+    if input_token == ETH_ADDRESS:
+        req = uniswap_wrapper._eth_to_token_swap_input(Web3.toChecksumAddress(output_token), input_quantity, None)
+    else:
+        req = uniswap_wrapper.make_trade(Web3.toChecksumAddress(input_token), Web3.toChecksumAddress(output_token),
                                      input_quantity)
     tx = w3.eth.waitForTransactionReceipt(req)
 
@@ -142,7 +147,7 @@ def read_accounts_from_env():
 
 
 def get_connection_uri(base_url: str, username: str):
-    return f"wss://{base_url}/api/v1/users/subscribe/{username}"
+    return f"ws://{base_url}/api/v1/users/subscribe/{username}"
 
 
 def main_is_frozen():
@@ -208,7 +213,10 @@ async def main(env_data, connection_retry=True):
                                 tx_dict = await uniswap_buy_input(input_token, output_token, input_quantity,
                                                                   max_slippage,
                                                                   max_gas, account, env_data.get('ethereum_provider'))
-                                msg_response = {"status": "done", "tx": tx_dict, "trading_config_id": trading_config_id,
+                                msg_response = {"status": "done",
+                                                "tx": tx_dict,
+                                                "trading_config_id": trading_config_id,
+                                                "input_quantity": input_quantity,
                                                 "strategy_type": strategy_type}
                                 logger.info(f'Got transaction: {str(tx_dict)}')
                                 logger.info(f'Transaction data sent to server!')
