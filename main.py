@@ -147,7 +147,7 @@ def read_accounts_from_env():
 
 
 def get_connection_uri(base_url: str, username: str):
-    return f"ws://{base_url}/api/v1/users/subscribe/{username}"
+    return f"wss://{base_url}/api/v1/users/subscribe/{username}"
 
 
 def main_is_frozen():
