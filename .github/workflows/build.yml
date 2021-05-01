@@ -36,11 +36,6 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: macos-latest
-            TARGET: macos
-            CMD_BUILD: pyinstaller -F -w -i tokemon.ico -n Tokemon --add-data main.py;src main.py && cd dist/ && zip -r9 Tokemon Tokemon.app/
-            OUT_FILE_NAME: Tokemon.zip
-            ASSET_MIME: application/zip
           - os: windows-latest
             TARGET: windows
             CMD_BUILD: pyinstaller.exe -i tokemon.ico -n Tokemon --noconsole --onefile --add-data main.py;src main.py
