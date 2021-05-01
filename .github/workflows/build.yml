@@ -38,7 +38,7 @@ jobs:
         include:
           - os: windows-latest
             TARGET: windows
-            CMD_BUILD: pyinstaller.exe -i tokemon.ico -n Tokemon --noconsole --onefile --add-data main.py;src main.py
+            CMD_BUILD: pyinstaller.exe -i tokemon.ico -n Tokemon --noconsole --onefile --add-data "main.py;src" main.py
             OUT_FILE_NAME: Tokemon.exe
             ASSET_MIME: application/vnd.microsoft.portable-executable
     steps:
