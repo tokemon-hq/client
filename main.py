@@ -237,6 +237,7 @@ async def main(env_data, connection_retry=True):
                             logger.error(e)
                             msg_response = {"status": "error",
                                             "trading_config_id": trading_config_id,
+                                            "input_quantity": input_quantity,
                                             "strategy_type": strategy_type,
                                             "tx_type": tx_type,
                                             "input_token": input_token,
