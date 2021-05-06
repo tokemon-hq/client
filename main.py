@@ -205,9 +205,11 @@ async def main(env_data, connection_retry=True):
                                 output_token = msg_json['output_token']
                                 input_quantity = msg_json['input_quantity']
                                 max_slippage = msg_json['max_slippage']
+                                gas_price_coefficient = msg_json['gas_price_coefficient']
                                 max_gas = msg_json['max_gas']
-                                trading_config_id = msg_json['trading_config_id']
+                                trading_config_id = msg_json.get('trading_config_id', '')
                                 strategy_type = msg_json['strategy_type']
+                                tx_type = msg_json['tx_type']
                                 account_name = msg_json['account']
                                 account = accounts[account_name]
                                 tx_dict = await uniswap_buy_input(input_token, output_token, input_quantity,
@@ -217,7 +219,15 @@ async def main(env_data, connection_retry=True):
                                                 "tx": tx_dict,
                                                 "trading_config_id": trading_config_id,
                                                 "input_quantity": input_quantity,
-                                                "strategy_type": strategy_type}
+                                                "strategy_type": strategy_type,
+                                                "tx_type": tx_type,
+                                                "input_token": input_token,
+                                                "output_token": output_token,
+                                                "gas_price_coefficient": gas_price_coefficient,
+                                                "max_gas": max_gas,
+                                                "max_slippage": max_slippage,
+                                                "account": account_name
+                                                }
                                 logger.info(f'Got transaction: {str(tx_dict)}')
                                 logger.info(f'Transaction data sent to server!')
                                 await websocket.send(json.dumps(msg_response))
@@ -225,8 +235,18 @@ async def main(env_data, connection_retry=True):
                                 logger.warning(f'Received unknown message: {msg}')
                         except Exception as e:
                             logger.error(e)
-                            msg_response = {"status": "error", "trading_config_id": trading_config_id,
-                                            "strategy_type": strategy_type, "message": str(e)}
+                            msg_response = {"status": "error",
+                                            "trading_config_id": trading_config_id,
+                                            "input_quantity": input_quantity,
+                                            "strategy_type": strategy_type,
+                                            "tx_type": tx_type,
+                                            "input_token": input_token,
+                                            "output_token": output_token,
+                                            "gas_price_coefficient": gas_price_coefficient,
+                                            "max_gas": max_gas,
+                                            "max_slippage": max_slippage,
+                                            "account": account_name,
+                                            "message": str(e)}
                             logger.info(f'Transaction data sent to server!')
                             await websocket.send(json.dumps(msg_response))
                 except websockets.exceptions.ConnectionClosedOK as e:
